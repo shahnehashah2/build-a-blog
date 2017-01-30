@@ -1,9 +1,15 @@
 import webapp2
+import cgi
 
 page_header = """<!DOCTYPE html>
 <html>
 <head>
     <title>Blog</title>
+    <style type="text/css">
+        .error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
     <h1>
@@ -19,13 +25,18 @@ page_footer = """
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
+        # Query recent-most 5 entries to be displayed
         content = page_header + page_footer
         self.response.write(content)
 
 class NewPostHandler(webapp2.RequestHandler):
     def get(self):
+        error = self.request.get('error')
+        error = ('<p class="error">' + cgi.escape(error) + '</p><br>'
+                if error else '')
         form = """
-        <form action="/" method="post">
+        <form method="post">
+            {}
             <label>
                 <strong>Subject</strong>
             </label>
@@ -40,8 +51,17 @@ class NewPostHandler(webapp2.RequestHandler):
             <br>
             <input type="submit">
         </form>
-        """
-        self.response.write(page_header+form+page_footer)
+        """.format(error)
+        self.response.write(page_header + form + page_footer)
+
+    def post(self):
+        subject = self.request.get('subject')
+        body = self.request.get('body')
+        if not subject or not body:
+            error = 'Need both Subject and Body'
+            self.redirect('/newpost?error=' + error)
+
+        # Otherwise add in database and redirect to home page
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
