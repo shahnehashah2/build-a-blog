@@ -1,16 +1,15 @@
 <form method="post">
-    <p style="color: red;">{{error}}</p>
+    <div name="error">{{error}}</div>
     <label>
-        <strong>Subject</strong>
+        Subject
     </label>
-    <br>
     <input type="text" name="subject" value="{{subject}}" style = "width:800px;">
-    <br><br>
-    <label>
-        <strong>Body</strong>
-    </label>
     <br>
-    <input type="text" name="body" value="{{body}}" style = "height:400px; width:800px;">
+    <label>
+        Body
+    </label>
+    <textarea name="body" value="{{body}}" style = "height:400px; width:800px;">
+    </textarea>
     <br>
     <input type="submit">
 </form>

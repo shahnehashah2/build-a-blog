@@ -1,11 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Blog</title>
-</head>
-<body>
-    <h1>
-        <a href="/">BlogPage</a>
-    </h1>
-</body>
+  <head>
+      <title>Blog</title>
+  </head>
+  <style type="text/css">
+    body {
+      width:800px;
+      margin: 0 auto;
+      padding 10px;
+      text-align: justify;
+    }
+
+    .error {
+      color: red;
+    }
+
+    label {
+      display: block;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .blog {
+      margin: 0px;
+      white-space: pre-wrap;
+    }
+  </style>
+  <body>
+      <h1>
+          <a href="/">BlogPage</a>
+      </h1>
+      {% for b in blogs %}
+        <div class="blog">
+<strong>{{b.subject}}</strong>
+{{b.body}}
+        </div>
+      {% endfor %}
+  </body>
 </html>
