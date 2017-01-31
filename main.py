@@ -1,69 +1,54 @@
 import webapp2
 import cgi
+import jinja2
+import os
 
-page_header = """<!DOCTYPE html>
-<html>
-<head>
-    <title>Blog</title>
-    <style type="text/css">
-        .error {
-            color: red;
-        }
-    </style>
-</head>
-<body>
-    <h1>
-        <a href="/">BlogPage</a>
-    </h1>
-"""
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
+                                autoescape = True)
 
-# html boilerplate for the bottom of every page
-page_footer = """
-</body>
-</html>
-"""
+class Handler(webapp2.RequestHandler):
+    def write(self, *args, **kwargs):
+        self.response.out.write(*args, **kwargs)
 
-class MainHandler(webapp2.RequestHandler):
+    def render_str(self,template, **params):
+        t = jinja_env.get_template(template)
+        return t.render(params)
+
+    def render(self, template, **kwargs):
+        self.write(self.render_str(template, **kwargs))
+
+class MainHandler(Handler):
     def get(self):
         # Query recent-most 5 entries to be displayed
-        content = page_header + page_footer
-        self.response.write(content)
+        self.render("base.html")
 
-class NewPostHandler(webapp2.RequestHandler):
+class NewPostHandler(Handler):
+    def makeForm(self, error='', subject='', body=''):
+        self.render("base.html")
+        self.render("blogform.html",error=error, subject=subject, body=body)
+
     def get(self):
-        error = self.request.get('error')
-        error = ('<p class="error">' + cgi.escape(error) + '</p><br>'
-                if error else '')
-        form = """
-        <form method="post">
-            {}
-            <label>
-                <strong>Subject</strong>
-            </label>
-            <br>
-            <input type="text" name="subject" style = "width:800px;">
-            <br><br>
-            <label>
-                <strong>Body</strong>
-            </label>
-            <br>
-            <input type="text" name="body" style = "height:400px; width:800px;">
-            <br>
-            <input type="submit">
-        </form>
-        """.format(error)
-        self.response.write(page_header + form + page_footer)
+        self.makeForm()
 
     def post(self):
         subject = self.request.get('subject')
         body = self.request.get('body')
+        error = ''
         if not subject or not body:
             error = 'Need both Subject and Body'
-            self.redirect('/newpost?error=' + error)
+            self.makeForm(error, subject, body)
+        else:
+            # Otherwise add in database and redirect to home page
+            self.redirect('/')
 
-        # Otherwise add in database and redirect to home page
+class ViewPostHandler(webapp2.RequestHandler):
+    def get(self, id):
+        #Display the subject and body for this id
+        pass
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-    ('/newpost', NewPostHandler)
+    ('/newpost', NewPostHandler),
+    webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
 ], debug=True)
