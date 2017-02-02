@@ -9,6 +9,14 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                 autoescape = True)
 
+def get_posts(offset, limit=5):
+    limit1 = int(limit)
+    offset = int(offset)
+    blogs = db.GqlQuery("""select * from Blog order by submitted_time DESC limit %s""" %limit1)
+    logging.info('Number of blogs = ************' +str(blogs.count()))
+    return blogs
+
+
 class Handler(webapp2.RequestHandler):
     def write(self, *args, **kwargs):
         self.response.out.write(*args, **kwargs)
@@ -22,9 +30,16 @@ class Handler(webapp2.RequestHandler):
 
 class MainHandler(Handler):
     def get(self):
-        # Query recent-most 5 entries to be displayed
+        page = self.request.get("page")
+        if not page:
+            page = 1
+        else:
+            page = int(page)
+        offset = page*5 - 5
+        #blogs = get_posts(offset,5)
         blogs = db.GqlQuery("select * from Blog order by submitted_time DESC limit 5")
         self.render("base.html", blogs=blogs)
+        self.render("pagination.html", page=page)
 
 class NewPostHandler(Handler):
     def makeForm(self, error='', subject='', body=''):
@@ -64,6 +79,7 @@ class ViewPostHandler(Handler):
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
+    ('/blog', MainHandler),
     ('/newpost', NewPostHandler),
     webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
 ], debug=True)
