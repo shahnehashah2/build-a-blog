@@ -25,16 +25,30 @@
       margin: 0px;
       white-space: pre-wrap;
     }
+
+    .newpost {
+      float: right;
+      background-color: cyan;
+    }
+
+    .homelogo {
+      background-color: orange;
+      text-decoration: none;
+      float: left;
+    }
   </style>
   <body>
-      <h1>
-          <a href="/">BlogPage</a>
-      </h1>
-      {% for b in blogs %}
-        <div class="blog">
-<strong>{{b.subject}}</strong>
+    <h1>
+      <a class="homelogo" href="/">BlogPage</a>
+    </h1>
+    <a class="newpost" href="/newpost">New Post</a>
+    <br><br><br>
+
+    {% for b in blogs %}
+      <div class="blog">
+<a href="/blog/{{b.key().id()}}"><strong>{{b.subject}}</strong></a>
 {{b.body}}
-        </div>
-      {% endfor %}
+      </div>
+    {% endfor %}
   </body>
 </html>

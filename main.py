@@ -3,6 +3,7 @@ import cgi
 import jinja2
 import os
 from google.appengine.ext import db
+import logging
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
@@ -43,19 +44,23 @@ class NewPostHandler(Handler):
         else:
             b = Blog(subject = subject, body = body)
             b.put()
-            self.redirect('/')
-
-class ViewPostHandler(webapp2.RequestHandler):
-    def get(self, id):
-        #Display the subject and body for this id
-        pass
+            self.redirect('/blog/{}'.format(str(b.key().id())))
 
 class Blog(db.Model):
     subject = db.StringProperty(required = True)
     body = db.TextProperty(required = True)
     submitted_time = db.DateTimeProperty(auto_now_add = True)
 
-
+class ViewPostHandler(Handler):
+    def get(self, id):
+        id1 = long(id)
+        if not Blog.get_by_id(id1):
+            self.render('base.html')
+            self.write("No blog found under that id")
+        else:
+            b = db.GqlQuery("select * from Blog where id = :id", id=id1)
+            logging.info("This should be printed*********" + str(b))
+            self.render("base.html", blogs=b)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
