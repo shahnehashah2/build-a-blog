@@ -39,7 +39,7 @@ class MainHandler(Handler):
         #blogs = get_posts(offset,5)
         blogs = db.GqlQuery("select * from Blog order by submitted_time DESC limit 5")
         self.render("base.html", blogs=blogs)
-        self.render("pagination.html", page=page)
+        self.render("pagination.html", page=page, count=blogs.count())
 
 class NewPostHandler(Handler):
     def makeForm(self, error='', subject='', body=''):
