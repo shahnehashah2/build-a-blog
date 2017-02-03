@@ -4,20 +4,19 @@ import jinja2
 import os
 from google.appengine.ext import db
 import logging
+from math import ceil
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                 autoescape = True)
 
-def get_posts(offset, limit=5):
-    limit1 = int(limit)
-    offset = int(offset)
-    blogs = db.GqlQuery("""select * from Blog order by submitted_time DESC limit %s""" %limit1)
-    logging.info('Number of blogs = ************' +str(blogs.count()))
-    return blogs
-
-
 class Handler(webapp2.RequestHandler):
+
+    # The following will be equivalent to:
+    # t = jinja_env.get_template("base.html")
+    # content = t.render(parameters that need to be passed for base.html)
+    # self.response.write(content)
+
     def write(self, *args, **kwargs):
         self.response.out.write(*args, **kwargs)
 
@@ -34,12 +33,14 @@ class MainHandler(Handler):
         if not page:
             page = 1
         else:
+            logging.info("Page***************"+page)
             page = int(page)
         offset = page*5 - 5
-        #blogs = get_posts(offset,5)
-        blogs = db.GqlQuery("select * from Blog order by submitted_time DESC limit 5")
-        self.render("base.html", blogs=blogs)
-        self.render("pagination.html", page=page, count=blogs.count())
+        limit = 5
+        blogs = db.GqlQuery("select * from Blog order by submitted_time DESC")
+        self.render("viewallblogs.html",
+                    blogs=blogs.run(limit=limit, offset=offset),
+                    page=page, count=blogs.count()/5)
 
 class NewPostHandler(Handler):
     def makeForm(self, error='', subject='', body=''):
@@ -69,13 +70,12 @@ class Blog(db.Model):
 class ViewPostHandler(Handler):
     def get(self, id):
         id1 = long(id)
-        if not Blog.get_by_id(id1):
+        b = Blog.get_by_id(id1)
+        if not b:
             self.render('base.html')
             self.write("No blog found under that id")
         else:
-            b = db.GqlQuery("select * from Blog where id = :id", id=id1)
-            logging.info("This should be printed*********" + str(b))
-            self.render("base.html", blogs=b)
+            self.render("viewblog.html", blog1=b)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),

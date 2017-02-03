@@ -53,12 +53,11 @@
     <a class="newpost" href="/newpost">New Post</a>
     <br><br><br>
 
-    {% for b in blogs %}
-      <div class="blog">
-<a href="/blog/{{b.key().id()}}"><strong>{{b.subject}}</strong></a>
-{{b.body}}
-      </div>
-    {% endfor %}
+    {% block viewallblogs %}
+    {% endblock viewallblogs %}
+
+    {% block viewblog %}
+    {% endblock viewblog %}
 
   </body>
 </html>

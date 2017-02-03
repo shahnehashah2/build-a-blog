@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block viewallblogs %}
+  {% for b in blogs %}
+    <div class="blog">
+<a href="/blog/{{b.key().id()}}"><strong>{{b.subject}}</strong></a>
+{{b.body}}
+    </div>
+  {% endfor %}
+
+  <div class="paginate">
+    {% if page != 1 %}
+      {% if page <= count %}
+        <a href="/blog?page={{page-1}}">Previous </a>
+        <a href="/blog?page={{page+1}}">| Next</a>
+      {% elif page > count+1 %}
+        <p>End of blog posts reached</p>
+        <a href="/blog?page={{count+1}}">Previous</a>
+      {% else %}
+        <a href="/blog?page={{page-1}}">Previous</a>
+      {% endif %}
+    {% else %}
+      <a href="/blog?page={{page+1}}">Next</a>
+    {% endif %}
+  </div>
+
+{% endblock viewallblogs %}
