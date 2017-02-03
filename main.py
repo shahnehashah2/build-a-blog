@@ -1,9 +1,14 @@
+'''
+This program creates and displays blogs. It adds new blogs and displays them in
+time created fashion. It takes care of pagination and navigation links for
+ease of use. It does not allow modification of the blogs.
+'''
+
 import webapp2
 import cgi
 import jinja2
 import os
 from google.appengine.ext import db
-import logging
 from math import ceil
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -33,7 +38,6 @@ class MainHandler(Handler):
         if not page:
             page = 1
         else:
-            logging.info("Page***************"+page)
             page = int(page)
         offset = page*5 - 5
         limit = 5
